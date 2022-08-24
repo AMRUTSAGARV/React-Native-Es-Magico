@@ -1,5 +1,14 @@
 import { StatusBar } from "expo-status-bar";
-import { SafeAreaView, StyleSheet, Text, TextInput, View } from "react-native";
+import {
+  Image,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableHighlight,
+  View,
+} from "react-native";
 import axios from "axios";
 import { useState } from "react";
 
@@ -12,11 +21,12 @@ export default function App() {
   });
 
   const search = () => {
-    //axios is making a call to our api url and on the end we re adding a new query parameter which is going to be s which stands for search in the database or the api we are using
+    //axios is making a call to our apiurl and on the end we re adding a new query parameter which is going to be s which stands for search in the database or the api we are using
     //and was then equal to the search crew we have set up here so currently it will be set to enter movie but when we actually type like on screen next it says "Batman(movie name you want)" we can actually change the batman to be what hit enter and how we'll search for that word so it'd be Batman which pass through
+    //data.data
     axios(apiurl + "&s=" + state.s).then(({ data }) => {
-      let results = data.search;
-      console.log(results);
+      let results = data.Search;
+
       setState((prevState) => {
         //we then going to return it and set the previous state to setState like how the state works we re then going to get the results and set the rsults to the rresults.
         return { ...prevState, results: results };
@@ -38,6 +48,27 @@ export default function App() {
         onSubmitEditing={search}
         value={state.s}
       />
+
+      <ScrollView style={styles.results}>
+        {state.results.map((result) => (
+          <TouchableHighlight
+            key={result.imdbID}
+            onPress={() => openPopup(result.imdbID)}
+          >
+            <View style={styles.result}>
+              <Image
+                source={{ uri: result.Poster }}
+                style={{
+                  w: 300,
+                  height: 300,
+                }}
+                resizeMode="cover"
+              />
+              <Text style={styles.heading}>{result.Title}</Text>
+            </View>
+          </TouchableHighlight>
+        ))}
+      </ScrollView>
     </View>
   );
 }
@@ -66,5 +97,20 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFF",
     borderRadius: 8,
     marginBottom: 40,
+  },
+  results: {
+    flex: 1,
+  },
+  result: {
+    flex: 1,
+    width: "100%",
+    marginBottom: 20,
+  },
+  heading: {
+    color: "#FFF",
+    fontSize: 18,
+    fontWeight: "700",
+    padding: 20,
+    backgroundColor: "#445565",
   },
 });
