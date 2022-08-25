@@ -8,6 +8,7 @@ import {
   TextInput,
   TouchableHighlight,
   View,
+  Modal,
 } from "react-native";
 import axios from "axios";
 import { useState } from "react";
@@ -34,9 +35,20 @@ export default function App() {
     });
   };
 
+  const openPopup = (id) => {
+    axios(apiurl + "&t=" + id).then(({ data }) => {
+      let result = data;
+      // console.log(result);
+
+      setState((prevState) => {
+        return { ...prevState, selected: result };
+      });
+    });
+  };
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Movie Db</Text>
+      <Text style={styles.title}>Es Magico Movies</Text>
       <TextInput
         style={styles.searchbox}
         onChangeText={(text) =>
@@ -53,13 +65,13 @@ export default function App() {
         {state.results.map((result) => (
           <TouchableHighlight
             key={result.imdbID}
-            onPress={() => openPopup(result.imdbID)}
+            onPress={() => openPopup(result.Title)}
           >
             <View style={styles.result}>
               <Image
                 source={{ uri: result.Poster }}
                 style={{
-                  w: 300,
+                  width: "100%",
                   height: 300,
                 }}
                 resizeMode="cover"
@@ -69,6 +81,28 @@ export default function App() {
           </TouchableHighlight>
         ))}
       </ScrollView>
+      <Modal
+        animationType="fade"
+        transparent={false}
+        visible={typeof state.selected.Title != "undefined"}
+      >
+        <View style={styles.popup}>
+          <Text style={styles.poptitle}>{state.selected.Title}</Text>
+          <Text style={{ marginBottom: 20 }}>
+            Rating: {state.selected.imdbRating}
+          </Text>
+          <Text>{state.selected.Plot}</Text>
+        </View>
+        <TouchableHighlight
+          onPress={() =>
+            setState((prevState) => {
+              return { ...prevState, selected: {} };
+            })
+          }
+        >
+          <Text style={styles.closeBtn}>Close</Text>
+        </TouchableHighlight>
+      </Modal>
     </View>
   );
 }
@@ -76,14 +110,15 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#223343",
+    backgroundColor: "#564C55",
     alignItems: "center",
     justifyContent: "flex-start",
     paddingTop: 70,
     paddingHorizontal: 20,
   },
   title: {
-    color: "#FFF",
+    color: "#FDBF6E",
+
     fontSize: 32,
     fontWeight: "700",
     textAlign: "center",
@@ -111,6 +146,28 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "700",
     padding: 20,
-    backgroundColor: "#445565",
+    backgroundColor: "#BC2041",
+  },
+  popup: {
+    padding: 40,
+  },
+  poptitle: {
+    fontSize: 24,
+
+    fontWeight: "700",
+    marginBottom: 5,
+  },
+  closeBtn: {
+    padding: 20,
+    fontSize: 20,
+    color: "#FDBF6E",
+    fontWeight: "700",
+    backgroundColor: "#564C55",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    borderRadius: 4,
+    elevation: 3,
   },
 });
